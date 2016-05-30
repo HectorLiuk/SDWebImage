@@ -42,10 +42,15 @@ static char TAG_ACTIVITY_SHOW;
 }
 
 - (void)sd_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options progress:(SDWebImageDownloaderProgressBlock)progressBlock completed:(SDWebImageCompletionBlock)completedBlock {
+    
+    //移除UIImageView当前绑定的操作.当TableView的cell包含的UIImageView被重用的时候首先执行这一行代码,保证这个ImageView的下载和缓存组合操作都被取消
     [self sd_cancelCurrentImageLoad];
+    
     objc_setAssociatedObject(self, &imageURLKey, url, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-
+//   options & SDWebImageDelayPlaceholder这是一个位运算的与操作,!(options & SDWebImageDelayPlaceholder)的意思就是options参数不是SDWebImageDelayPlaceholder,就执行以下操作
+    
     if (!(options & SDWebImageDelayPlaceholder)) {
+//        这是一个宏定义,因为图像的绘制只能在主线程完成,所以dispatch_main_sync_safe就是为了保证block在主线程中执行
         dispatch_main_async_safe(^{
             self.image = placeholder;
         });
@@ -54,11 +59,14 @@ static char TAG_ACTIVITY_SHOW;
     if (url) {
 
         // check if activityView is enabled or not
+        // 检查是否通过`setShowActivityIndicatorView:`方法设置了显示正在加载指示器。如果设置了，使用`addActivityIndicator`方法向self添加指示器
+
         if ([self showActivityIndicatorView]) {
             [self addActivityIndicator];
         }
 
         __weak __typeof(self)wself = self;
+        //图片下载回调
         id <SDWebImageOperation> operation = [SDWebImageManager.sharedManager downloadImageWithURL:url options:options progress:progressBlock completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
             [wself removeActivityIndicator];
             if (!wself) return;

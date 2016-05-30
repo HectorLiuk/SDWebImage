@@ -209,6 +209,13 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
  *
  * @return Returns an NSObject conforming to SDWebImageOperation. Should be an instance of SDWebImageDownloaderOperation
  */
+/*
+ *第一个参数是必须的,就是image的url
+ *第二个参数options你可以定制化各种各样的操作
+ *第三个参数是一个回调block,用于图片下载过程中的回调
+ *第四个参数是一个下载完成的回调,会在图片下载完成后回调
+ *返回值是一个NSObject类,并且这个NSObject类是遵循一个协议这个协议叫SDWebImageOperation,这个协议里面只写了一个协议,就是一个cancel一个operation的协议
+ */
 - (id <SDWebImageOperation>)downloadImageWithURL:(NSURL *)url
                                          options:(SDWebImageOptions)options
                                         progress:(SDWebImageDownloaderProgressBlock)progressBlock
